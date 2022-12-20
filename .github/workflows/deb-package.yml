@@ -1,4 +1,4 @@
-name: Build and Test elevation_mapping
+name: Deb package elevation_mapping
 
 on:
   push:
@@ -43,8 +43,46 @@ jobs:
       run: |
         echo "yaml file://`pwd`/src/elevation_mapping/rosdep.yaml" | sudo tee /etc/ros/rosdep/sources.list.d/elevation_mapping.list
         rosdep update
-    - name: Package deb
-      uses: gdut-dynamic-x/ros-build-deb-action@v1
-      with:
-        ros_distro: noetic
-        timestamp: true
+    - name: Deb deps
+      run: |
+        echo "Install packaging tool..."
+        sudo apt update && sudo apt-get install -y \
+            python3-bloom \
+            fakeroot \
+            dh-make \
+            devscripts
+        pip install shyaml
+    - name: Rosdep
+      run: |
+        rosdep update
+        rosdep install --from-paths src --ignore-src -r -y
+    - name: Build (${{ matrix.build_type }})
+      shell: bash
+      run: |
+        source /opt/ros/noetic/setup.bash
+        catkin_make_isolated --use-ninja --merge --only-pkg-with-deps elevation_mapping --cmake-args -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+    - name: Package
+      run: |
+        tmp_space="/tmp/catkin_binary_deb"
+        source /devel_isolated/setup.bash
+        run_directory=`pwd`
+        time_stamp=`date +%Y%m%d.%H%M%S`
+        
+        mkdir $tmp_space
+        cp -r ./ $tmp_space
+        package_list=`find $tmp_space -name package.xml | sed 's/package.xml//g'`
+        CM_PREFIX_PATH=`sed 's/:/;/g' <<< $CMAKE_PREFIX_PATH`
+        for package_source in $package_list
+        do
+          echo "Trying to package $package_source..."
+          cd $package_source
+          bloom-generate rosdebian --os-name ubuntu --ros-distro noetic
+          package_version=`dpkg-parsechangelog | grep 'Version:' | sed 's/Version: //g'`
+          debchange -v $package_version.$time_stamp -p -D -u -m 'Append timestamp when binarydeb was built.'
+          sed -e "s|-DCMAKE_PREFIX_PATH=.*|-DCMAKE_PREFIX_PATH=\""$CM_PREFIX_PATH"\"|g" -i debian/rules
+          fakeroot debian/rules binary
+          cd $run_directory
+        done
+        echo 'Package has been done.'
+        find $tmp_space/.. -name '*.deb' -o -name '*.ddeb'|xargs -I {} cp {} $run_directory/
+    
