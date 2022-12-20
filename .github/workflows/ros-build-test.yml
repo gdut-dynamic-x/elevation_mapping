@@ -35,9 +35,9 @@ jobs:
         path: src/elevation_mapping 
     - name: Checkout dependencies
       run: |
-        git clone https://github.com/anybotics/grid_map
-        git clone https://github.com/anybotics/kindr
-        git clone https://github.com/anybotics/kindr_ros
+        git clone https://github.com/anybotics/grid_map src/grid_map
+        git clone https://github.com/anybotics/kindr src/kindr
+        git clone https://github.com/anybotics/kindr_ros src/kindr_ros
     - name: Rosdep
       run: |
         rosdep update
