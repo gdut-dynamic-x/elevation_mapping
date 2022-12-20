@@ -48,6 +48,7 @@ jobs:
         echo "Install packaging tool..."
         sudo apt update && sudo apt-get install -y \
             python3-bloom \
+            python3-pip \
             fakeroot \
             dh-make \
             devscripts
