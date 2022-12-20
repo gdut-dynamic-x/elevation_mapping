@@ -38,6 +38,7 @@ jobs:
         git clone https://github.com/anybotics/grid_map src/grid_map
         git clone https://github.com/anybotics/kindr src/kindr
         git clone https://github.com/anybotics/kindr_ros src/kindr_ros
+        git clone https://github.com/ANYbotics/message_logger src/message_logger
     - name: Rosdep
       run: |
         rosdep update
