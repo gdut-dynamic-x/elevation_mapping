@@ -65,7 +65,7 @@ jobs:
     - name: Package
       run: |
         tmp_space="/tmp/catkin_binary_deb"
-        source /devel_isolated/setup.bash
+        source ./devel_isolated/setup.bash
         run_directory=`pwd`
         time_stamp=`date +%Y%m%d.%H%M%S`
         
