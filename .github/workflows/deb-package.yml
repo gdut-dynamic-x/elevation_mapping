@@ -1,0 +1,46 @@
+name: Build and Test elevation_mapping
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    # build both Release mode
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [ Release ]
+
+    # environment: regular Ubuntu with a vanilla ROS container
+    runs-on: ubuntu-latest
+    container: 
+      image: ros:noetic
+
+    steps:
+    - name: Environment Info
+      run: |
+        pwd
+        uname -r
+        lsb_release -a
+    - name: System deps
+      run: |
+        apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get install -y git libeigen3-dev ninja-build keyboard-configuration
+    - uses: actions/checkout@v2
+      with: 
+        path: src/elevation_mapping 
+    - name: Checkout dependencies
+      run: |
+        git clone https://github.com/anybotics/grid_map src/grid_map
+        git clone https://github.com/anybotics/kindr src/kindr
+        git clone https://github.com/anybotics/kindr_ros src/kindr_ros
+        git clone https://github.com/ANYbotics/message_logger src/message_logger
+    - name: Package deb
+      uses: gdut-dynamic-x/ros-build-deb-action@v1
+      with:
+        ros_distro: noetic
+        timestamp: true
