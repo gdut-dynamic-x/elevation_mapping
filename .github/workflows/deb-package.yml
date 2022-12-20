@@ -39,6 +39,10 @@ jobs:
         git clone https://github.com/anybotics/kindr src/kindr
         git clone https://github.com/anybotics/kindr_ros src/kindr_ros
         git clone https://github.com/ANYbotics/message_logger src/message_logger
+    - name: Add temp rosdep index
+      run: |
+        echo "yaml file://`pwd`/src/elevation_mapping/rosdep.yaml" | sudo tee /etc/ros/rosdep/sources.list.d/elevation_mapping.list
+        rosdep update
     - name: Package deb
       uses: gdut-dynamic-x/ros-build-deb-action@v1
       with:
