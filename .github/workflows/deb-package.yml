@@ -63,9 +63,8 @@ jobs:
         source /opt/ros/noetic/setup.bash
         catkin_make_isolated --use-ninja --merge --only-pkg-with-deps elevation_mapping --cmake-args -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
     - name: Package
+      shell: bash
       run: |
-        ls
-        ls devel_isolated
         tmp_space="/tmp/catkin_binary_deb"
         source devel_isolated/setup.bash
         run_directory=`pwd`
